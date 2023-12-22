@@ -1,7 +1,9 @@
 107-speech-recognition-quantization
 108-gpu-device
+111-yolov5-quantization-migration
 117-model-server
 122-quantizing-model-with-accuracy-control
+204-segmenter-semantic-segmentation
 216-attention-center
 220-cross-lingual-books-alignment
 223-text-prediction
@@ -18,6 +20,7 @@
 240-dolly-2-instruction-following
 241-riffusion-text-to-music
 242-freevc-voice-conversion
+247-code-language-id
 248-stable-diffusion-xl
 249-oneformer-segmentation
 250-music-generation
@@ -31,5 +34,15 @@
 258-blip-diffusion-subject-generation
 259-decidiffusion-image-generation
 260-pix2struct-docvqa
+261-fast-segment-anything
 262-softvc-voice-conversion
 263-latent-consistency-models-image-generation
+264-qrcode-monster
+265-wuerstchen-image-generation
+266-speculative-sampling
+267-distil-whisper-asr
+269-film-slowmo
+270-sound-generation-audioldm2
+271-sdxl-turbo
+272-paint-by-example
+273-stable-zephyr-3b-chatbot
