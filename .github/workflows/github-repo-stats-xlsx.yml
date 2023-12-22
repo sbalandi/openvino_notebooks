@@ -1,0 +1,20 @@
+name: github-repo-stats-xlsx
+
+on:
+  schedule:
+    # Run this once per day, towards the end of the day for keeping the most
+    # recent data point most meaningful (hours are interpreted in UTC).
+    - cron: "0 23 * * *"
+  workflow_dispatch: # Allow for running this manually.
+
+jobs:
+  j1:
+    name: github-repo-stats-xlsx
+    runs-on: ubuntu-latest
+    steps:
+      - name: postprocess-ghrs
+        with:
+          repository: openvinotoolkit/openvino_notebooks
+          ghtoken: ${{ secrets.ghrs_github_api_token }}
+        run: |
+          python .ci/workflows/statistic.py
