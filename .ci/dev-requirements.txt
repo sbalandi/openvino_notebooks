@@ -14,11 +14,5 @@ toml                        # used for validating docker requirements
 mistune==2.0.4              # use for parsing README.md
 requests==2.31.0            # use for checking links
 pyspelling                  # automating spell checking
-argparse
-openpyxl
-csv
-github
-pathlib
-datetime
-base64
-logging
+openpyxl==3.1.2
+PyGithub==2.1.1
