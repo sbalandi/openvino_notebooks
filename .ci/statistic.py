@@ -9,18 +9,19 @@ from datetime import datetime
 import requests
 import base64
 
+import logging
+
+logging.basicConfig()
+logger = logging.getLogger('statistic')
+logger.setLevel(logging.INFO)
+
+
 URL_PATH_KEY = 'url_path'
 REFERRER_KEY = 'referrer'
 VIEWS_UNIQUE_KEY = 'views_unique'
 VIEWS_TOTAL_KEY = 'views_total'
 
 TWO_WEEKS = 14
-
-import logging
-
-logging.basicConfig()
-logger = logging.getLogger('statistic')
-logger.setLevel(logging.INFO)
 
 class Contents():
     def __init__(self, decoded_content, name):
@@ -39,6 +40,7 @@ def get_contents_from_local_dir(dir_path):
 
 
 def create_exel(paths_data, referrs_data, report_name: Path):
+    logger.info(f'Create xslx file')
     exel_builed = ExelBuiler()
 
 # ------------------------------------- pivot_paths ------------------------------------
@@ -167,7 +169,7 @@ class ExelBuiler():
                     worksheet.cell(row,cell).fill = self.fail_fill
                     worksheet.cell(row, cell).font = self.fail_font
 
-                worksheet.cell(row, cell, info[date[0]]['views_unique'])
+                worksheet.cell(row, cell, info[date[0]][VIEWS_UNIQUE_KEY])
             
             worksheet.cell(row, grand_total_source_cell, info['all_unique'])
 
@@ -190,7 +192,7 @@ class ExelBuiler():
             for path_name, path_info in sources_info.items():
                 if data_info[0] not in path_info:
                     continue
-                worksheet.append((data_info[1]['source_name'], path_name, path_info[data_info[0]]['views_total'], path_info[data_info[0]]['views_unique']))
+                worksheet.append((data_info[1]['source_name'], path_name, path_info[data_info[0]][VIEWS_TOTAL_KEY], path_info[data_info[0]][VIEWS_UNIQUE_KEY]))
 
                 if first_row:
                     first_row = False
@@ -222,12 +224,10 @@ class ExelBuiler():
            
             for path_name, path_info in sources_info.items():
                 row_data = [None] * (len(sorted_date_info[offset_date:]) + 1)
-                # worksheet.cell(row, 1, path_name)
                 for i, date in enumerate(sorted_date_info[offset_date:]):
                     if not date[0] in path_info:
                         continue
-                    row_data[i+1] = path_info[date[0]]['views_unique']
-                    # worksheet.cell(row, i + 2, path_info[date[0]]['views_unique'])
+                    row_data[i+1] = path_info[date[0]][VIEWS_UNIQUE_KEY]
 
                 if len(set(row_data)) > 1:
                     row_data[0] = path_name
@@ -269,38 +269,42 @@ class ExelBuiler():
             logger.info(f'Excel file hasn`t created because there is no content')
 
 BRANCH = "github-repo-stats"
-
-EMAIL = "action@github.com"
-AUTHOR = "GitHub Action"
+REPO = 'openvino_notebooks'
+STATISTRIC_FOLDER_ROOT = 'openvinotoolkit/openvino_notebooks'
 
 def get_contents_from_gh(token):
+    logger.info(f'Get contents')
     g = Github(login_or_token=token)
-    repo = g.get_repo("sbalandi/openvino_notebooks")
-    contents = repo.get_contents("openvinotoolkit/openvino_notebooks/ghrs-data/snapshots", ref=BRANCH)
+    repo = g.get_repo(f"sbalandi/{REPO}")
+    contents = repo.get_contents(f"{STATISTRIC_FOLDER_ROOT}/ghrs-data/snapshots", ref=BRANCH)
     return contents
 
 def push_table_to_gh(file_name, token):
-    
-    base64content = base64.b64encode(open(file_name,"rb").read()).decode("utf-8")
+    logger.info(f'Commit final xlsx')
+    g = Github(login_or_token=token)
+    user = g.get_user()
 
+    base64content = base64.b64encode(open(file_name,"rb").read()).decode("utf-8")
 
     current_dateTime = datetime.now().strftime("data_%m_%d_%Y_time_%H_%M_%S")
 
     data = {
         "message": f"add new statistics file {current_dateTime}",
         "committer": {
-            "name": AUTHOR,
-            "email": EMAIL
+            "name": user.login,
+            "email": user.email
         },
         "content": base64content,
         "branch": BRANCH
     }
 
+    logger.info(f'xlsx path: {STATISTRIC_FOLDER_ROOT}/statistics/statistics_{current_dateTime}.xlsx')
+
     url = "{}/{}/{}/contents/{}".format(
         "https://api.github.com/repos",
-        AUTHOR,
-        "openvino_notebooks",
-        f"sbalandi/openvino_notebooks/statistics/statistics_{current_dateTime}.xlsx"
+        user.login,
+        REPO,
+        f"{STATISTRIC_FOLDER_ROOT}/statistics/statistics_{current_dateTime}.xlsx"
     )
 
     headers = {
