@@ -1,5 +1,3 @@
-import os
-import sys
 import argparse
 
 import openpyxl
@@ -17,6 +15,12 @@ VIEWS_UNIQUE_KEY = 'views_unique'
 VIEWS_TOTAL_KEY = 'views_total'
 
 TWO_WEEKS = 14
+
+import logging
+
+logging.basicConfig()
+logger = logging.getLogger('statistic')
+logger.setLevel(logging.INFO)
 
 class Contents():
     def __init__(self, decoded_content, name):
@@ -174,7 +178,7 @@ class ExelBuiler():
 
         sources_info = data.get_sources_info()
         date_info = data.get_date_info()
-        sorted_date_info = sorted(date_info)
+        sorted_date_info = sorted(date_info.items())
 
         for i, title in enumerate(['Source.Name', 'Url.Path', 'Total view', 'Unique view']):
             worksheet.cell(1, i + 1, title)
@@ -215,13 +219,19 @@ class ExelBuiler():
                 worksheet.cell(row, i + 2).font = self.title_font
 
             row = row_offset + 2
+           
             for path_name, path_info in sources_info.items():
-                worksheet.cell(row, 1, path_name)
+                row_data = [None] * (len(sorted_date_info[offset_date:]) + 1)
+                # worksheet.cell(row, 1, path_name)
                 for i, date in enumerate(sorted_date_info[offset_date:]):
                     if not date[0] in path_info:
                         continue
+                    row_data[i+1] = path_info[date[0]]['views_unique']
+                    # worksheet.cell(row, i + 2, path_info[date[0]]['views_unique'])
 
-                    worksheet.cell(row, i + 2, path_info[date[0]]['views_unique'])
+                if len(set(row_data)) > 1:
+                    row_data[0] = path_name
+                    worksheet.append(row_data)
 
                 row += 1
 
@@ -229,7 +239,10 @@ class ExelBuiler():
             c2.y_axis.title = "Unique views"
             c2.x_axis.title = "Date"
 
-            dates = openpyxl.chart.Reference(worksheet, min_col=1, min_row=row_offset + 2, max_row=worksheet.max_row - 1, max_col=15)
+            c2.height = 10
+            c2.width = 25
+
+            dates = openpyxl.chart.Reference(worksheet, min_col=1, min_row=row_offset + 2, max_row=worksheet.max_row, max_col=15)
             c2.add_data(dates, from_rows=True, titles_from_data=True)
             dates2 = openpyxl.chart.Reference(worksheet, min_col=2, min_row=row_offset + 1, max_row=row_offset + 1, max_col=15)
             c2.set_categories(dates2)
@@ -245,7 +258,15 @@ class ExelBuiler():
             row_offset += worksheet.max_row + 50
 
     def save_exel(self, file_name: Path):
-        self.workbook.save(file_name)
+        for worksheet in self.workbook.worksheets:
+            if worksheet.max_row <= 1:
+                self.workbook.remove(worksheet)
+
+        if len(self.workbook.worksheets) > 0:
+            self.workbook.save(file_name)
+            logger.info(f'Exel file with results is created: {file_name}')
+        else:
+            logger.info(f'Excel file hasn`t created because there is no content')
 
 BRANCH = "github-repo-stats"
 
@@ -264,8 +285,6 @@ def push_table_to_gh(file_name, token):
 
 
     current_dateTime = datetime.now().strftime("data_%m_%d_%Y_time_%H_%M_%S")
-
-    print(current_dateTime)
 
     data = {
         "message": f"add new statistics file {current_dateTime}",
@@ -295,8 +314,7 @@ def push_table_to_gh(file_name, token):
                     headers=headers,
                     json=data
                 )
-    print(response) 
-
+    logger.info(f'Commit status {response}')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -305,13 +323,13 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # contents = get_contents_files()
-    contents = get_contents_from_gh(args.token)
+    contents = get_contents_from_gh(args.ghtoken)
 
     paths_data = Data()
     referrs_data = Data()
 
     for content in contents:
-        print(content.name)
+        logger.info(f"Analyze file {content.name}")
         text = content.decoded_content.decode('utf-8')
         if 'top_paths_snapshot' in content.name:
             paths_data.collect_data(text, key_source=URL_PATH_KEY, min_max_key=VIEWS_UNIQUE_KEY)
@@ -321,4 +339,4 @@ if __name__ == '__main__':
     exel_file_path = Path('report_name.xlsx')
     create_exel(paths_data, referrs_data, exel_file_path)
 
-    push_table_to_gh(exel_file_path.as_posix(), args.token)
+    push_table_to_gh(exel_file_path.as_posix(), args.ghtoken)
