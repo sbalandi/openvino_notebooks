@@ -21,8 +21,6 @@ REFERRER_KEY = 'referrer'
 VIEWS_UNIQUE_KEY = 'views_unique'
 VIEWS_TOTAL_KEY = 'views_total'
 
-TWO_WEEKS = 14
-
 class Contents():
     def __init__(self, decoded_content, name):
         self.decoded_content = decoded_content
@@ -82,8 +80,10 @@ class Data():
             views_total = int(row[VIEWS_TOTAL_KEY])
             source_path = row[key_source]
         
-            if (key_source == URL_PATH_KEY and Path(source_path).parent.name != 'notebooks' and '.ipynb' != Path(source_path).suffix):
-                continue
+            if key_source == URL_PATH_KEY:
+                if Path(source_path).parent.name != 'notebooks' and '.ipynb' != Path(source_path).suffix:
+                    continue
+                source_path = Path(source_path).name
             
             self._sources_info.setdefault(source_path, {'all_total': 0, 'all_unique': 0})
             self._sources_info[source_path][date] = { VIEWS_TOTAL_KEY: int(views_total), VIEWS_UNIQUE_KEY: views_unique }
@@ -214,8 +214,7 @@ class ExelBuiler():
             worksheet.cell(row, 1).fill = self.title_fill
             worksheet.cell(row, 1).font = self.title_font
             
-            offset_date = 0 if len(sorted_date_info) < TWO_WEEKS else -TWO_WEEKS
-            for i, date in enumerate(sorted_date_info[offset_date:]):
+            for i, date in enumerate(sorted_date_info):
                 worksheet.cell(row, i + 2, date[0])
                 worksheet.cell(row, i + 2).fill = self.title_fill
                 worksheet.cell(row, i + 2).font = self.title_font
@@ -223,8 +222,8 @@ class ExelBuiler():
             row = row_offset + 2
            
             for path_name, path_info in sources_info.items():
-                row_data = [None] * (len(sorted_date_info[offset_date:]) + 1)
-                for i, date in enumerate(sorted_date_info[offset_date:]):
+                row_data = [None] * (len(sorted_date_info) + 1)
+                for i, date in enumerate(sorted_date_info):
                     if not date[0] in path_info:
                         continue
                     row_data[i+1] = path_info[date[0]][VIEWS_UNIQUE_KEY]
@@ -242,9 +241,9 @@ class ExelBuiler():
             c2.height = 10
             c2.width = 25
 
-            dates = openpyxl.chart.Reference(worksheet, min_col=1, min_row=row_offset + 2, max_row=worksheet.max_row, max_col=15)
+            dates = openpyxl.chart.Reference(worksheet, min_col=1, min_row=row_offset + 2, max_row=worksheet.max_row, max_col=(len(sorted_date_info) + 1))
             c2.add_data(dates, from_rows=True, titles_from_data=True)
-            dates2 = openpyxl.chart.Reference(worksheet, min_col=2, min_row=row_offset + 1, max_row=row_offset + 1, max_col=15)
+            dates2 = openpyxl.chart.Reference(worksheet, min_col=2, min_row=row_offset + 1, max_row=row_offset + 1, max_col=(len(sorted_date_info) + 1))
             c2.set_categories(dates2)
 
             for i in range(0, len(c2.series)):
