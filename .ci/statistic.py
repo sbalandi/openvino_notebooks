@@ -238,8 +238,8 @@ class ExelBuiler():
             c2.y_axis.title = "Unique views"
             c2.x_axis.title = "Date"
 
-            c2.height = 10
-            c2.width = 25
+            c2.height = 17
+            c2.width = 35
 
             dates = openpyxl.chart.Reference(worksheet, min_col=1, min_row=row_offset + 2, max_row=worksheet.max_row, max_col=(len(sorted_date_info) + 1))
             c2.add_data(dates, from_rows=True, titles_from_data=True)
