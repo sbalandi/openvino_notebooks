@@ -79,16 +79,39 @@ class Data():
             views_unique = int(row[VIEWS_UNIQUE_KEY])
             views_total = int(row[VIEWS_TOTAL_KEY])
             source_path = row[key_source]
-        
+
             if key_source == URL_PATH_KEY:
+                # let analyze only notebook or dirs with notebooks
                 if Path(source_path).parent.name != 'notebooks' and '.ipynb' != Path(source_path).suffix:
                     continue
-                source_path = Path(source_path).name
-            
-            self._sources_info.setdefault(source_path, {'all_total': 0, 'all_unique': 0})
+                parent_name = Path(source_path).parent.name
+                if '.ipynb' == Path(source_path).suffix and self._sources_info.get(parent_name):
+                    for key, item in self._sources_info[parent_name].items():
+                        if key == 'all_total' or key == 'all_unique' or key == 'full_path':
+                            continue
+                        self._date_info[key]['all_total'] -= int(item[VIEWS_TOTAL_KEY])
+                        self._date_info[key]['all_unique'] -= int(item[VIEWS_UNIQUE_KEY])
+                    del self._sources_info[parent_name]
+                elif '.ipynb' != Path(source_path).suffix:
+                    the_same_dir = False
+                    for _, info in self._sources_info.items():
+                        # \openvinotoolkit\openvino_notebooks\[blob/tree]\main\notebooks\254-llm-chatbot\254-llm-chatbot.ipynb
+                        if ('.ipynb' == Path(info['full_path']).suffix and
+                            Path(info['full_path']).parts[0:3] == Path(source_path).parts[0:3] and
+                            Path(info['full_path']).parts[4:7] == Path(source_path).parts[4:7]):
+                            the_same_dir = True
+                            break
+                    if the_same_dir:
+                        continue
+
+                source_path = Path(row[key_source]).name
+
+
+            self._sources_info.setdefault(source_path, {'all_total': 0, 'all_unique': 0, 'full_path': ''})
             self._sources_info[source_path][date] = { VIEWS_TOTAL_KEY: int(views_total), VIEWS_UNIQUE_KEY: views_unique }
             self._sources_info[source_path]['all_total'] += int(views_total)
             self._sources_info[source_path]['all_unique'] += int(views_unique)
+            self._sources_info[source_path]['full_path'] = row[key_source]
 
             self._date_info[date]['all_total'] += int(views_total)
             self._date_info[date]['all_unique'] += int(views_unique)
