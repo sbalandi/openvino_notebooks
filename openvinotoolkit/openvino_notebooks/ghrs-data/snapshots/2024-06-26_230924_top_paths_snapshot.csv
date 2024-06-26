@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/openvinotoolkit/openvino_notebooks,3139,1457
+/openvinotoolkit/openvino_notebooks/tree/latest/notebooks,2619,606
+/openvinotoolkit/openvino_notebooks/blob/latest/notebooks/llm-chatbot/llm-chatbot.ipynb,1449,408
+/openvinotoolkit/openvino_notebooks/tree/latest/notebooks/llm-chatbot,907,337
+/openvinotoolkit/openvino_notebooks/wiki/Windows,731,395
+/openvinotoolkit/openvino_notebooks/blob/latest/notebooks/llm-rag-langchain/llm-rag-langchain.ipynb,723,228
+/openvinotoolkit/openvino_notebooks/tree/recipes/recipes,623,223
+/openvinotoolkit/openvino_notebooks/pulls,608,36
+/openvinotoolkit/openvino_notebooks/blob/latest/notebooks/yolov8-optimization/yolov8-object-detection.ipynb,554,118
+/openvinotoolkit/openvino_notebooks/tree/recipes/recipes/defect_detection_anomalib,452,147
