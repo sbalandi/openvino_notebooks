@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/openvinotoolkit/openvino_notebooks,3179,1459
+/openvinotoolkit/openvino_notebooks/tree/latest/notebooks,2658,611
+/openvinotoolkit/openvino_notebooks/tree/latest/notebooks/freevc-voice-conversion,1864,861
+/openvinotoolkit/openvino_notebooks/tree/latest/notebooks/llm-chatbot,1553,622
+/openvinotoolkit/openvino_notebooks/blob/latest/notebooks/llm-chatbot/llm-chatbot.ipynb,1463,400
+/openvinotoolkit/openvino_notebooks/tree/latest/notebooks/riffusion-text-to-music,1233,582
+/openvinotoolkit/openvino_notebooks/tree/latest/notebooks/distil-whisper-asr,859,409
+/openvinotoolkit/openvino_notebooks/wiki/Windows,782,415
+/openvinotoolkit/openvino_notebooks/blob/latest/notebooks/llm-rag-langchain/llm-rag-langchain.ipynb,702,212
+/openvinotoolkit/openvino_notebooks/tree/recipes/recipes,598,220
