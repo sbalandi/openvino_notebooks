@@ -3,7 +3,7 @@
 # black==21.8 requires typing-extensions>3.10 which is incompatible
 # with other packages
 -r ../requirements.txt
-black==21.7b0               # format Python code
+black[jupyter]==24.3.0               # format Python code
 isort                       # sort imports
 jupyterlab-code-formatter   # format code in notebooks in Jupyter Lab
 jupyterlab-git              # checkout and commit code in Jupyter Lab
@@ -12,7 +12,7 @@ nbval                       # pytest plugin for automatic notebook testing
 treon                       # test framework for Jupyter Notebooks 
 toml                        # used for validating docker requirements
 mistune==2.0.4              # use for parsing README.md
-requests==2.31.0            # use for checking links
+requests==2.32.0            # use for checking links
 pyspelling                  # automating spell checking
 openpyxl==3.1.2
 PyGithub==2.1.1
